@@ -1,0 +1,5 @@
+id,origen,destino,peso,volumen,tipoCarga,certificadoInternacional,temperaturaRequerida,dias
+Transito
+ORD-001,Valparaiso,Shanghai,12000,34.5,Hazmat,true,0,18
+ORD-002,San Antonio,Busan,8000,22.0,Reefer,false,-18,15
+ORD-003,Callao,Los Angeles,15000,40.0,Dry,false,0,21
