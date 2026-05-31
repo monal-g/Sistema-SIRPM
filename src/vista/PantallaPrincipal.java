@@ -1,5 +1,6 @@
 package vista;
 
+import controlador.*;
 import java.awt.*;
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -8,7 +9,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import modelo.*;
-import controlador.*;
 
 public class PantallaPrincipal extends JFrame {
 
@@ -85,26 +85,58 @@ public class PantallaPrincipal extends JFrame {
         String path = "src/ordenes.csv";
         try (BufferedReader br = new BufferedReader(new FileReader(path))) {
             String linea;
-            br.readLine(); // Saltar encabezado
+            // Saltar encabezado que puede estar dividido en dos líneas
+            linea = br.readLine();
+            if (linea != null && !linea.contains(",")) {
+                // Si la primera línea no tiene comas, quizá no es el inicio de los datos
+            }
+            if (linea != null && (linea.startsWith("id") || linea.startsWith("ID"))) {
+                // Es el encabezado, si vemos que "Transito" está en la siguiente línea...
+                br.mark(1000);
+                String siguiente = br.readLine();
+                if (siguiente != null && !siguiente.contains(",")) {
+                    // La segunda línea también es parte del encabezado
+                } else {
+                    br.reset();
+                }
+            }
+
             int count = 0;
             while ((linea = br.readLine()) != null) {
+                if (linea.trim().isEmpty() || !linea.contains(",")) continue;
+                
                 String[] datos = linea.split(",");
                 if (datos.length >= 6) {
-                    OrdenEnvio orden = new OrdenEnvio(
-                        datos[0], 
-                        Puerto.valueOf(datos[1].toUpperCase().replace(" ", "_")), 
-                        Puerto.valueOf(datos[2].toUpperCase().replace(" ", "_")), 
-                        Double.parseDouble(datos[3]), 
-                        Double.parseDouble(datos[4]), 
-                        TipoCarga.valueOf(datos[5].toUpperCase())
-                    );
-                    listaOrdenes.add(orden);
-                    count++;
+                    try {
+                        String id = datos[0];
+                        Puerto origen = Puerto.valueOf(datos[1].toUpperCase().replace(" ", "_"));
+                        Puerto destino = Puerto.valueOf(datos[2].toUpperCase().replace(" ", "_"));
+                        double peso = Double.parseDouble(datos[3]);
+                        double volumen = Double.parseDouble(datos[4]);
+                        TipoCarga tipo = TipoCarga.valueOf(datos[5].toUpperCase());
+                        
+                        boolean cert = (datos.length > 6) ? Boolean.parseBoolean(datos[6]) : false;
+                        double temp = (datos.length > 7) ? Double.parseDouble(datos[7]) : 0;
+                        int dias = 0;
+                        if (datos.length > 8) {
+                            // Limpiar posibles caracteres extraños al final de la línea
+                            String diasStr = datos[8].replaceAll("[^0-9-]", "");
+                            if (!diasStr.isEmpty()) {
+                                dias = Integer.parseInt(diasStr);
+                            }
+                        }
+
+                        OrdenEnvio orden = new OrdenEnvio(id, origen, destino, peso, volumen, tipo, cert, temp, dias);
+                        listaOrdenes.add(orden);
+                        count++;
+                    } catch (Exception ex) {
+                        System.err.println("Error procesando línea: " + linea + " - " + ex.getMessage());
+                    }
                 }
             }
             JOptionPane.showMessageDialog(this, "Se cargaron " + count + " órdenes desde " + path);
-        } catch (IOException | IllegalArgumentException ex) {
-            JOptionPane.showMessageDialog(this, "Error al cargar archivo: " + ex.getMessage());
+        } catch (IOException ex) {
+            JOptionPane.showMessageDialog(this, "Error al abrir archivo: " + ex.getMessage());
         }
     }
 

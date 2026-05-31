@@ -18,7 +18,8 @@ public class EstrategiaDryStandard implements EstrategiaCalculoTarifa {
     @Override
     public List<Puerto> obtenerRuta(OrdenEnvio orden) {
         List<Puerto> ruta = new ArrayList<>();
-        // En un caso real buscaríamos los enums correspondientes
+        ruta.add(orden.getOrigen());
+        ruta.add(orden.getDestino());
         return ruta;
     }
 

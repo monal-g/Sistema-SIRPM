@@ -18,6 +18,6 @@ public class ResultadoProceso {
 
     @Override
     public String toString() {
-        return "Orden " + idOrden + " | Tarifa: $" + tarifaFinal + " | Exitoso: " + exitoso;
+        return "Orden " + idOrden + " | Tarifa: $" + (exitoso ? tarifaFinal : "N/A") + " | Exitoso: " + exitoso + (exitoso ? "" : " | Motivo: " + mensaje);
     }
 }
