@@ -1,3 +1,8 @@
+package vista;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 import javax.swing.*;
 
 public class PantallaLogin extends JFrame {
@@ -59,19 +64,33 @@ public class PantallaLogin extends JFrame {
 
     private void validarLogin() {
 
-        String usuario = txtUsuario.getText();
-        String contra = new String(txtContra.getPassword());
+        String usuarioInput = txtUsuario.getText();
+        String contraInput = new String(txtContra.getPassword());
+        boolean loginExitoso = false;
 
-        // Usando contraseñas definidas
-        if ((usuario.equals("admin") && contra.equals("admin123")) ||
-            (usuario.equals("operador") && contra.equals("operador123"))) {
+        try (BufferedReader br = new BufferedReader(new FileReader("src/usuarios.csv"))) {
+            String linea;
+            br.readLine(); // saltar cabecera
+            while ((linea = br.readLine()) != null) {
+                String[] datos = linea.split(",");
+                if (datos.length >= 2) {
+                    String userFile = datos[0];
+                    String passFile = datos[1];
 
+                    if (usuarioInput.equals(userFile) && contraInput.equals(passFile)) {
+                        loginExitoso = true;
+                        break;
+                    }
+                }
+            }
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(this, "Error al leer archivo de usuarios");
+        }
+
+        if (loginExitoso) {
             jlMensaje.setText("Bienvenido al sistema SIRPM");
-
             abrirPantallaPrincipal();
-
         } else {
-
             jlMensaje.setText("Credenciales inválidas");
         }
     }
